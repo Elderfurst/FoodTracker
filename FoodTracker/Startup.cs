@@ -1,3 +1,4 @@
+using FoodTracker.Config;
 using FoodTracker.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,7 +22,13 @@ namespace FoodTracker
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+			// Build settings from each configuration section and register as singletons.
+			var appSettings = Configuration.GetSection("Config").Get<AppSettings>();
+
+			// Register all of our settings classes
+			services.AddSingleton(appSettings);
+
+			services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(appSettings.DatabaseConnectionString));
 
 			services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
 			
