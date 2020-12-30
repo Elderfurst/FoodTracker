@@ -13,12 +13,14 @@ namespace FoodTracker
 {
 	public class Startup
 	{
-		public Startup(IConfiguration configuration)
+		public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
 		{
 			Configuration = configuration;
+			Env = webHostEnvironment;
 		}
 
 		public IConfiguration Configuration { get; }
+		public IWebHostEnvironment Env { get; set; }
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
@@ -34,7 +36,7 @@ namespace FoodTracker
 			services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
 			
 			services.AddControllersWithViews();
-			services.AddRazorPages();
+			var builder = services.AddRazorPages();
 
 			services.AddAuthorization(options =>
 			{
@@ -42,6 +44,11 @@ namespace FoodTracker
 					.RequireAuthenticatedUser()
 					.Build();
 			});
+
+			if (Env.IsDevelopment())
+			{
+				builder.AddRazorRuntimeCompilation();
+			}
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
